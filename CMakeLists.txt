@@ -18,6 +18,7 @@ option(LIBCLIPBOARD_USE_STDCALL "Use the stdcall calling convention (default:off
 option(LIBCLIPBOARD_ENABLE_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
 option(LIBCLIPBOARD_ENABLE_SAMPLES "Enable samples" ${PROJECT_IS_TOP_LEVEL})
 option(LIBCLIPBOARD_ENABLE_INSTALL "Enable install" ${PROJECT_IS_TOP_LEVEL})
+option(LIBCLIPBOARD_ENABLE_PKGCONFIG "Enable pkg-config" ${PROJECT_IS_TOP_LEVEL})
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static libraries" OFF)
 set(LIBCLIPBOARD_BUILD_SHARED ${BUILD_SHARED_LIBS})
@@ -133,14 +134,16 @@ if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_SAMPLES)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 endif()
 
-# Pkgconfig
-include(FindPkgConfig QUIET)
-if (PKGCONFIG_FOUND)
-    string(REPLACE "-l" "" LIBCLIPBOARD_PRIVATE_LIBS_LIST "${LIBCLIPBOARD_PRIVATE_LIBS}")
-    string(REPLACE ";" " -l" LIBCLIPBOARD_PRIVATE_LIBS_LIST "${LIBCLIPBOARD_PRIVATE_LIBS_LIST}")
-    string(STRIP "${LIBCLIPBOARD_PRIVATE_LIBS_LIST}" LIBCLIPBOARD_PRIVATE_LIBS_LIST)
-    configure_file("libclipboard.pc.in" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pkgconfig/libclipboard.pc" @ONLY)
-    install(FILES "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pkgconfig/libclipboard.pc" DESTINATION "lib/pkgconfig")
+if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_PKGCONFIG)
+    # Pkgconfig
+    include(FindPkgConfig QUIET)
+    if (PKGCONFIG_FOUND)
+        string(REPLACE "-l" "" LIBCLIPBOARD_PRIVATE_LIBS_LIST "${LIBCLIPBOARD_PRIVATE_LIBS}")
+        string(REPLACE ";" " -l" LIBCLIPBOARD_PRIVATE_LIBS_LIST "${LIBCLIPBOARD_PRIVATE_LIBS_LIST}")
+        string(STRIP "${LIBCLIPBOARD_PRIVATE_LIBS_LIST}" LIBCLIPBOARD_PRIVATE_LIBS_LIST)
+        configure_file("libclipboard.pc.in" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pkgconfig/libclipboard.pc" @ONLY)
+        install(FILES "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pkgconfig/libclipboard.pc" DESTINATION "lib/pkgconfig")
+    endif()
 endif()
 
 if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_INSTALL)
