@@ -33,6 +33,7 @@
 *.su
 
 # CMake
+**/build/
 CMakeCache.txt
 CMakeFiles/
 Testing/
@@ -48,6 +49,10 @@ tags
 doc/
 doxygen_sqlite3.db
 libclipboard-config.h
+
+# Clangd
+**/.clangd
+**/.cache/clangd/index/
 
 # CMake Visual Studio generated
 .vs/

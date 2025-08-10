@@ -239,6 +239,6 @@ TEST_P(WithMode, TestNewlines) {
     clipboard_free(cb2);
 }
 
-INSTANTIATE_TEST_CASE_P(ClipboardBasicsTest,
+INSTANTIATE_TEST_SUITE_P(ClipboardBasicsTest,
                         WithMode,
                         ::testing::Range(LCB_CLIPBOARD, LCB_MODE_END, 1));

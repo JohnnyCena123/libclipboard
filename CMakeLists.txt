@@ -1,6 +1,6 @@
 # libclipboard cmake configuration file
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.16)
 project(libclipboard)
 
 # Defines and options
@@ -14,6 +14,11 @@ option(LIBCLIPBOARD_FORCE_COCOA "Force building the Cocoa backend(default:off)" 
 
 option(LIBCLIPBOARD_ADD_SOVERSION "Add soname versions to the built library (default:off)" OFF)
 option(LIBCLIPBOARD_USE_STDCALL "Use the stdcall calling convention (default:off)" OFF)
+
+option(LIBCLIPBOARD_ENABLE_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
+option(LIBCLIPBOARD_ENABLE_SAMPLES "Enable samples" ${PROJECT_IS_TOP_LEVEL})
+option(LIBCLIPBOARD_ENABLE_INSTALL "Enable install" ${PROJECT_IS_TOP_LEVEL})
+
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static libraries" OFF)
 set(LIBCLIPBOARD_BUILD_SHARED ${BUILD_SHARED_LIBS})
 
@@ -105,14 +110,15 @@ if (LIBCLIPBOARD_ADD_SOVERSION)
 endif()
 
 # Testing mode?
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/googletest)
+if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_TESTING)
+    include(cmake/CPM.cmake)
+    CPMAddPackage("gh:google/googletest@1.17.0")
     # gtest does not play well with pthreads and mingw
     if (gtest_disable_pthreads)
         set(LIBCLIPBOARD_USE_PTHREADS_INIT ${CMAKE_USE_PTHREADS_INIT})
         unset(CMAKE_USE_PTHREADS_INIT)
     endif()
 
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest EXCLUDE_FROM_ALL)
     enable_testing()
     include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
@@ -122,8 +128,10 @@ else()
 
 endif()
 
-# Build sample executables
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples)
+if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_SAMPLES)
+    # Build sample executables
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples)
+endif()
 
 # Pkgconfig
 include(FindPkgConfig QUIET)
@@ -135,18 +143,20 @@ if (PKGCONFIG_FOUND)
     install(FILES "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pkgconfig/libclipboard.pc" DESTINATION "lib/pkgconfig")
 endif()
 
-# Install options
-install(TARGETS clipboard
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-install(FILES ${HEADERS} DESTINATION include)
+if (${PROJECT_IS_TOP_LEVEL} OR LIBCLIPBOARD_ENABLE_INSTALL)
+    # Install options
+    install(TARGETS clipboard
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
+    install(FILES ${HEADERS} DESTINATION include)
 
-# Uninstall target
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+    # Uninstall target
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
