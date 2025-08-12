@@ -97,11 +97,6 @@ set(SOURCE
     src/clipboard_common.c
 )
 
-# Set the output folders
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
 # Make the library
 add_library(clipboard ${HEADERS} ${SOURCE})
 target_link_libraries(clipboard LINK_PRIVATE ${LIBCLIPBOARD_PRIVATE_LIBS})
