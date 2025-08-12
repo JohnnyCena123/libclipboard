@@ -54,6 +54,9 @@ libclipboard-config.h
 **/.clangd
 **/.cache/clangd/index/
 
+# VSCode
+**/.vscode/
+
 # CMake Visual Studio generated
 .vs/
 Win32/
